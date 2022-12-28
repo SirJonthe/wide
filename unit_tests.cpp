@@ -331,7 +331,7 @@ bool float_asin_bs( void )
 	return true;
 }
 
-bool float_asin_nr( void )
+/*bool float_asin_nr( void )
 {
 	std::cout << "float_asin_nr...";
 
@@ -361,7 +361,7 @@ bool float_asin_nr( void )
 
 	std::cout << "succeeded" << std::endl;
 	return true;
-}
+}*/
 
 int main(int,char**)
 {
@@ -380,6 +380,6 @@ int main(int,char**)
 	if (!float_cos())       { return 1; }
 	if (!float_tan())       { return 1; }
 //	if (!float_asin_bs())   { return 1; }
-	if (!float_asin_nr())   { return 1; }
+//	if (!float_asin_nr())   { return 1; }
 	return 0;
 }
