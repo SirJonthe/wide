@@ -12,7 +12,7 @@
 #define ASSVAL(type) \
 	struct values \
 	{ \
-		external_t vals[Width]; \
+		serial_t vals[Width]; \
 	}; \
 	type(const values &vals) { FOR(v[i] = vals.vals[i]) } \
 	type &operator=(const values &vals) { FOR(v[i] = vals.vals[i]) return *this; }
@@ -20,19 +20,19 @@
 #define CONSTR(type, from1, from2) \
 	type( void ) = default; \
 	type(const type&) = default; \
-	type(external_t r) { FOR(v[i] = r) } \
-	explicit type(const external_t *r) { FOR(v[i] = r[i]) } \
+	type(serial_t r) { FOR(v[i] = r) } \
+	explicit type(const serial_t *r) { FOR(v[i] = r[i]) } \
 	explicit type(const from1<Depth,Width> &r) { FOR(v[i] = r.v[i]) } \
 	explicit type(const from2<Depth,Width> &r) { FOR(v[i] = r.v[i]) } \
 	explicit type(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? serial_t(1) : serial_t(0)) } \
 	type &operator=(const type&) = default; \
-	type &operator=(external_t r) { FOR(v[i] = r) return *this; } \
+	type &operator=(serial_t r) { FOR(v[i] = r) return *this; } \
 	type &operator=(const cset<type> &test) { *this = cmov(test.mask, test.a, *this); return *this; } \
 	type &operator=(const cset<const type> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
 #define ASSOP(type, op) \
 	type &operator op(const type &r) { FOR(v[i] op r.v[i]) return *this; } \
-	type &operator op(external_t r)  { FOR(v[i] op r)      return *this; }
+	type &operator op(serial_t r)  { FOR(v[i] op r)      return *this; }
 
 #define INCOP(type, op) \
 	type &operator op( void ) { FOR(op v[i]) return *this; } \
@@ -74,8 +74,8 @@
 
 #define OPOP(type, op) \
 	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const type<Depth,Width> &r)                             { return l op##= r; } \
-	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const typename type<Depth,Width>::external_t &r)        { return l op##= r; } \
-	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(const typename type<Depth,Width>::external_t &l, const type<Depth,Width> &r) { return type<Depth,Width>(l) op##= r; }
+	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const typename type<Depth,Width>::serial_t &r)        { return l op##= r; } \
+	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return type<Depth,Width>(l) op##= r; }
 
 #define WIDE_IF(condition) \
 	{ \
@@ -181,7 +181,6 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_bool
 {
 public:
 	typedef typename __wide_types<Depth>::uint_t serial_t;
-	typedef bool external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_int<Depth,Width>;
@@ -198,13 +197,15 @@ private:
 public:
 	wide_bool( void ) = default;
 	wide_bool(const wide_bool&) = default;
-	wide_bool(external_t r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) }
+	wide_bool(bool r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) }
 	
-	explicit wide_bool(const external_t *r) { FOR(v[i] = r[i] ? TRUE_BITS : FALSE_BITS) }
-	explicit wide_bool(const wide_int<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS); }
+	explicit wide_bool(const bool *r) { FOR(v[i] = r[i] ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const wide_int<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const wide_uint<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const wide_float<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
 	
 	wide_bool &operator=(const wide_bool&) = default;
-	wide_bool &operator=(external_t r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
+	wide_bool &operator=(bool r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
 	wide_bool &operator=(const cset<wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 	wide_bool &operator=(const cset<const wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
@@ -237,7 +238,6 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::int_t)) wide_int
 {
 public:
 	typedef typename __wide_types<Depth>::int_t serial_t;
-	typedef serial_t external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_float<Depth,Width>;
@@ -268,7 +268,6 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_uint
 {
 public:
 	typedef typename __wide_types<Depth>::uint_t serial_t;
-	typedef serial_t external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_float<Depth,Width>;
@@ -301,7 +300,6 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::float_t)) wide_float
 {
 public:
 	typedef typename __wide_types<Depth>::float_t serial_t;
-	typedef serial_t external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_int<Depth,Width>;
