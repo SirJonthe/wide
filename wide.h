@@ -9,6 +9,19 @@
 #define CMP(sign) wide_bool<Depth,Width> o; for (uint32_t i = 0; i < Width; ++i) { o.v[i] = v[i] sign r.v[i] ? wide_bool<Depth,Width>::TRUE_BITS : wide_bool<Depth,Width>::FALSE_BITS; } return o
 #define CMP1(sign) wide_bool<Depth,Width> o; for (uint32_t i = 0; i < Width; ++i) { o.v[i] = v[i] sign r ? wide_bool<Depth,Width>::TRUE_BITS : wide_bool<Depth,Width>::FALSE_BITS; } return o
 
+#define ASSVAL(type) \
+	struct values \
+	{ \
+		external_t vals[Width]; \
+	}; \
+	type(const values &vals) { FOR(v[i] = vals.vals[i]) } \
+	type &operator=(const values &vals) { FOR(v[i] = vals.vals[i]) return *this; }
+
+#define CONVCON(to, from1, from2, from3) \
+	explicit to(const from1 &f) { FOR(v[i] = f.v[i]) } \
+	explicit to(const from2 &f) { FOR(v[i] = f.v[i]) } \
+	explicit to(const from3 &f) { FOR(v[i] = f.v[i]) }
+
 #define ASSOP(type, op) \
 	type &operator op(const type &r) { FOR(v[i] op r.v[i]) return *this; } \
 	type &operator op(serial_t r)    { FOR(v[i] op r)      return *this; }
@@ -140,6 +153,7 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_bool
 {
 public:
 	typedef typename __wide_types<Depth>::uint_t serial_t;
+	typedef bool external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_int<Depth,Width>;
@@ -156,11 +170,11 @@ private:
 public:
 	wide_bool( void ) = default;
 	wide_bool(const wide_bool&) = default;
-	wide_bool(bool r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) }
-	explicit wide_bool(const bool *r) { FOR(v[i] = r[i] ? TRUE_BITS : FALSE_BITS) }
+	wide_bool(external_t r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const external_t *r) { FOR(v[i] = r[i] ? TRUE_BITS : FALSE_BITS) }
 	explicit wide_bool(const wide_int<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS); }
 	wide_bool &operator=(const wide_bool&) = default;
-	wide_bool &operator=(bool r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
+	wide_bool &operator=(external_t r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
 	wide_bool &operator=(const cset<wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 	wide_bool &operator=(const cset<const wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
@@ -191,6 +205,7 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::int_t)) wide_int
 {
 public:
 	typedef typename __wide_types<Depth>::int_t serial_t;
+	typedef serial_t external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_float<Depth,Width>;
@@ -201,12 +216,12 @@ private:
 public:
 	wide_int( void ) = default;
 	wide_int(const wide_int&) = default;
-	wide_int(serial_t r) { FOR(v[i] = r) }
-	explicit wide_int(const serial_t *r) { FOR(v[i] = r[i]) }
+	wide_int(external_t r) { FOR(v[i] = r) }
+	explicit wide_int(const external_t *r) { FOR(v[i] = r[i]) }
 	explicit wide_int(const wide_float<Depth,Width> &r) { FOR(v[i] = r.v[i]) }
 	explicit wide_int(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? 1 : 0) }
 	wide_int &operator=(const wide_int&) = default;
-	wide_int &operator=(serial_t r) { FOR(v[i] = r) return *this; }
+	wide_int &operator=(external_t r) { FOR(v[i] = r) return *this; }
 	wide_int &operator=(const cset<wide_int> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 	wide_int &operator=(const cset<const wide_int> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
@@ -240,6 +255,7 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_uint
 {
 public:
 	typedef typename __wide_types<Depth>::uint_t serial_t;
+	typedef serial_t external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_float<Depth,Width>;
@@ -250,12 +266,12 @@ private:
 public:
 	wide_uint( void ) = default;
 	wide_uint(const wide_uint&) = default;
-	wide_uint(serial_t r) { FOR(v[i] = r) }
-	explicit wide_uint(const serial_t *r) { FOR(v[i] = r[i]) }
+	wide_uint(external_t r) { FOR(v[i] = r) }
+	explicit wide_uint(const external_t *r) { FOR(v[i] = r[i]) }
 	explicit wide_uint(const wide_float<Depth,Width> &r) { FOR(v[i] = r.v[i]) }
 	explicit wide_uint(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? 1 : 0) }
 	wide_uint &operator=(const wide_uint&) = default;
-	wide_uint &operator=(serial_t r) { FOR(v[i] = r) return *this; }
+	wide_uint &operator=(external_t r) { FOR(v[i] = r) return *this; }
 	wide_uint &operator=(const cset<wide_uint> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 	wide_uint &operator=(const cset<const wide_uint> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
@@ -295,6 +311,7 @@ class alignas(Width * sizeof(typename __wide_types<Depth>::float_t)) wide_float
 {
 public:
 	typedef typename __wide_types<Depth>::float_t serial_t;
+	typedef serial_t external_t;
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_int<Depth,Width>;
