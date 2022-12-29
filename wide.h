@@ -17,19 +17,22 @@
 	type(const values &vals) { FOR(v[i] = vals.vals[i]) } \
 	type &operator=(const values &vals) { FOR(v[i] = vals.vals[i]) return *this; }
 
-#define CONVCON(to, from1, from2, from3) \
-	explicit to(const from1 &f) { FOR(v[i] = f.v[i]) } \
-	explicit to(const from2 &f) { FOR(v[i] = f.v[i]) } \
-	explicit to(const from3 &f) { FOR(v[i] = f.v[i]) }
+#define CONSTR(type, from1, from2) \
+	type( void ) = default; \
+	type(const type&) = default; \
+	type(external_t r) { FOR(v[i] = r) } \
+	explicit type(const external_t *r) { FOR(v[i] = r[i]) } \
+	explicit type(const from1<Depth,Width> &r) { FOR(v[i] = r.v[i]) } \
+	explicit type(const from2<Depth,Width> &r) { FOR(v[i] = r.v[i]) } \
+	explicit type(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? serial_t(1) : serial_t(0)) } \
+	type &operator=(const type&) = default; \
+	type &operator=(external_t r) { FOR(v[i] = r) return *this; } \
+	type &operator=(const cset<type> &test) { *this = cmov(test.mask, test.a, *this); return *this; } \
+	type &operator=(const cset<const type> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
 #define ASSOP(type, op) \
 	type &operator op(const type &r) { FOR(v[i] op r.v[i]) return *this; } \
-	type &operator op(serial_t r)    { FOR(v[i] op r)      return *this; }
-
-#define OPOP(type, op) \
-	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const type<Depth,Width> &r)                           { return l op##= r; } \
-	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const typename type<Depth,Width>::serial_t &r)        { return l op##= r; } \
-	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return type<Depth,Width>(l) op##= r; }
+	type &operator op(external_t r)  { FOR(v[i] op r)      return *this; }
 
 #define INCOP(type, op) \
 	type &operator op( void ) { FOR(op v[i]) return *this; } \
@@ -37,6 +40,26 @@
 
 #define UNIOP(type, op) \
 	type operator op( void ) const { type o; FOR(o.v[i] = op v[i]) return o; }
+
+#define ARITASSOPS(type) \
+	ASSOP(type, +=) \
+	ASSOP(type, -=) \
+	ASSOP(type, *=) \
+	ASSOP(type, /=) \
+	INCOP(type, ++) \
+	INCOP(type, --)
+
+#define INTARITASSOPS(type) \
+	ARITASSOPS(type) \
+	ASSOP(type, %=)
+
+#define BITOPS(type) \
+	ASSOP(type, <<=) \
+	ASSOP(type, >>=) \
+	ASSOP(type, &=) \
+	ASSOP(type, |=) \
+	ASSOP(type, ^=) \
+	UNIOP(type, ~)
 
 #define CMPOP(type, op) \
 	wide_bool<Depth,Width> operator op(const type &r) const { CMP(op); }
@@ -48,6 +71,11 @@
 	CMPOP(type, >) \
 	CMPOP(type, <=) \
 	CMPOP(type, >=)
+
+#define OPOP(type, op) \
+	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const type<Depth,Width> &r)                             { return l op##= r; } \
+	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const typename type<Depth,Width>::external_t &r)        { return l op##= r; } \
+	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(const typename type<Depth,Width>::external_t &l, const type<Depth,Width> &r) { return type<Depth,Width>(l) op##= r; }
 
 #define WIDE_IF(condition) \
 	{ \
@@ -171,12 +199,16 @@ public:
 	wide_bool( void ) = default;
 	wide_bool(const wide_bool&) = default;
 	wide_bool(external_t r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) }
+	
 	explicit wide_bool(const external_t *r) { FOR(v[i] = r[i] ? TRUE_BITS : FALSE_BITS) }
 	explicit wide_bool(const wide_int<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS); }
+	
 	wide_bool &operator=(const wide_bool&) = default;
 	wide_bool &operator=(external_t r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
 	wide_bool &operator=(const cset<wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 	wide_bool &operator=(const cset<const wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
+
+	ASSVAL(wide_bool)
 
 	ASSOP(wide_bool, &=)
 	ASSOP(wide_bool, |=)
@@ -209,36 +241,17 @@ public:
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_float<Depth,Width>;
+	friend class wide_uint<Depth,Width>;
 
 private:
 	serial_t v[Width];
 
 public:
-	wide_int( void ) = default;
-	wide_int(const wide_int&) = default;
-	wide_int(external_t r) { FOR(v[i] = r) }
-	explicit wide_int(const external_t *r) { FOR(v[i] = r[i]) }
-	explicit wide_int(const wide_float<Depth,Width> &r) { FOR(v[i] = r.v[i]) }
-	explicit wide_int(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? 1 : 0) }
-	wide_int &operator=(const wide_int&) = default;
-	wide_int &operator=(external_t r) { FOR(v[i] = r) return *this; }
-	wide_int &operator=(const cset<wide_int> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
-	wide_int &operator=(const cset<const wide_int> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
-
-
-	ASSOP(wide_int, +=)
-	ASSOP(wide_int, -=)
-	ASSOP(wide_int, *=)
-	ASSOP(wide_int, /=)
-	ASSOP(wide_int, %=)
-	ASSOP(wide_int, <<=)
-	ASSOP(wide_int, >>=)
-
+	CONSTR(wide_int, wide_uint, wide_float)
+	ASSVAL(wide_int)
+	INTARITASSOPS(wide_int)
 	UNIOP(wide_int, -)
-	
-	INCOP(wide_int, ++)
-	INCOP(wide_int, --)
-
+	BITOPS(wide_int)
 	CMPOPS(wide_int)
 };
 
@@ -259,39 +272,16 @@ public:
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_float<Depth,Width>;
+	friend class wide_int<Depth,Width>;
 
 private:
 	serial_t v[Width];
 
 public:
-	wide_uint( void ) = default;
-	wide_uint(const wide_uint&) = default;
-	wide_uint(external_t r) { FOR(v[i] = r) }
-	explicit wide_uint(const external_t *r) { FOR(v[i] = r[i]) }
-	explicit wide_uint(const wide_float<Depth,Width> &r) { FOR(v[i] = r.v[i]) }
-	explicit wide_uint(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? 1 : 0) }
-	wide_uint &operator=(const wide_uint&) = default;
-	wide_uint &operator=(external_t r) { FOR(v[i] = r) return *this; }
-	wide_uint &operator=(const cset<wide_uint> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
-	wide_uint &operator=(const cset<const wide_uint> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
-
-	ASSOP(wide_uint, +=)
-	ASSOP(wide_uint, -=)
-	ASSOP(wide_uint, *=)
-	ASSOP(wide_uint, /=)
-	ASSOP(wide_uint, %=)
-	ASSOP(wide_uint, <<=)
-	ASSOP(wide_uint, >>=)
-	ASSOP(wide_uint, &=)
-	ASSOP(wide_uint, |=)
-	ASSOP(wide_uint, ^=)
-
-	UNIOP(wide_uint, -)
-	UNIOP(wide_uint, ~)
-	
-	INCOP(wide_uint, ++)
-	INCOP(wide_uint, --)
-
+	CONSTR(wide_uint, wide_float, wide_int)
+	ASSVAL(wide_uint)
+	INTARITASSOPS(wide_uint)
+	BITOPS(wide_uint)
 	CMPOPS(wide_uint)
 };
 
@@ -315,31 +305,16 @@ public:
 	static constexpr uint32_t width = Width;
 	static constexpr uint32_t depth = Depth;
 	friend class wide_int<Depth,Width>;
+	friend class wide_uint<Depth,Width>;
 
 private:
 	serial_t v[Width];
 
 public:
-	wide_float( void ) = default;
-	wide_float(const wide_float&) = default;
-	wide_float(serial_t r) { FOR(v[i] = r) }
-	explicit wide_float(const serial_t *r) { FOR(v[i] = r[i]) }
-	explicit wide_float(const wide_int<Depth,Width> &r) { FOR(v[i] = r.v[i]) }
-	wide_float &operator=(const wide_float&) = default;
-	wide_float &operator=(serial_t r) { FOR(v[i] = r) return *this; }
-	wide_float &operator=(const cset<wide_float> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
-	wide_float &operator=(const cset<const wide_float> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
-
-	ASSOP(wide_float, +=)
-	ASSOP(wide_float, -=)
-	ASSOP(wide_float, *=)
-	ASSOP(wide_float, /=)
-
+	CONSTR(wide_float, wide_int, wide_uint)
+	ASSVAL(wide_float)
+	ARITASSOPS(wide_float)
 	UNIOP(wide_float, -)
-	
-	INCOP(wide_float, ++)
-	INCOP(wide_float, --)
-
 	CMPOPS(wide_float)
 };
 
@@ -369,9 +344,14 @@ template < typename wide_t > const typename wide_t::serial_t *serialize(const wi
 #undef FOR
 #undef CMP
 #undef CMP1
+#undef ASSVAL
+#undef CONSTR
 #undef ASSOP
 #undef INCOP
 #undef UNIOP
+#undef ARITASSOPS
+#undef INTARITASSOPS
+#undef BITOPS
 #undef CMPOP
 #undef CMPOPS
 
