@@ -6,15 +6,12 @@
 #include <cstdlib>
 
 #define FOR(x) for (uint32_t i = 0; i < Width; ++i) { x; }
-#define CMP(sign) wide_bool<Depth,Width> o; for (uint32_t i = 0; i < Width; ++i) { o.v[i] = v[i] sign r.v[i] ? wide_bool<Depth,Width>::TRUE_BITS : wide_bool<Depth,Width>::FALSE_BITS; } return o
-#define CMP1(sign) wide_bool<Depth,Width> o; for (uint32_t i = 0; i < Width; ++i) { o.v[i] = v[i] sign r ? wide_bool<Depth,Width>::TRUE_BITS : wide_bool<Depth,Width>::FALSE_BITS; } return o
+#define CMP(sign)  wide_bool<Depth,Width> o; for (uint32_t i = 0; i < Width; ++i) { o.v[i] = v[i] sign r.v[i] ? wide_bool<Depth,Width>::TRUE_BITS : wide_bool<Depth,Width>::FALSE_BITS; } return o
+#define CMP1(sign) wide_bool<Depth,Width> o; for (uint32_t i = 0; i < Width; ++i) { o.v[i] = v[i] sign r      ? wide_bool<Depth,Width>::TRUE_BITS : wide_bool<Depth,Width>::FALSE_BITS; } return o
 
 #define ASSVAL(type) \
-	struct values \
-	{ \
-		serial_t vals[Width]; \
-	}; \
-	type(const values &vals) { FOR(v[i] = vals.vals[i]) } \
+	struct values { serial_t vals[Width]; }; \
+	type(const values &vals) : type(vals.vals) {} \
 	type &operator=(const values &vals) { FOR(v[i] = vals.vals[i]) return *this; }
 
 #define CONSTR(type, from1, from2) \
@@ -32,7 +29,7 @@
 
 #define ASSOP(type, op) \
 	type &operator op(const type &r) { FOR(v[i] op r.v[i]) return *this; } \
-	type &operator op(serial_t r)  { FOR(v[i] op r)      return *this; }
+	type &operator op(serial_t r)    { FOR(v[i] op r)      return *this; }
 
 #define INCOP(type, op) \
 	type &operator op( void ) { FOR(op v[i]) return *this; } \
@@ -51,9 +48,7 @@
 
 #define INTARITASSOPS(type) \
 	ARITASSOPS(type) \
-	ASSOP(type, %=)
-
-#define BITOPS(type) \
+	ASSOP(type, %=) \
 	ASSOP(type, <<=) \
 	ASSOP(type, >>=) \
 	ASSOP(type, &=) \
@@ -62,7 +57,8 @@
 	UNIOP(type, ~)
 
 #define CMPOP(type, op) \
-	wide_bool<Depth,Width> operator op(const type &r) const { CMP(op); }
+	wide_bool<Depth,Width> operator op(const type &r) const     { CMP(op); } \
+	wide_bool<Depth,Width> operator op(const serial_t &r) const { CMP1(op); }
 
 #define CMPOPS(type) \
 	CMPOP(type, ==) \
@@ -73,9 +69,32 @@
 	CMPOP(type, >=)
 
 #define OPOP(type, op) \
-	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const type<Depth,Width> &r)                             { return l op##= r; } \
+	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const type<Depth,Width> &r)                           { return l op##= r; } \
 	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(type<Depth,Width> l, const typename type<Depth,Width>::serial_t &r)        { return l op##= r; } \
 	template < uint32_t Depth, uint32_t Width > type<Depth,Width> operator op(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return type<Depth,Width>(l) op##= r; }
+
+#define ARITOPOPS(type) \
+	OPOP(type, +) \
+	OPOP(type, -) \
+	OPOP(type, *) \
+	OPOP(type, /)
+
+#define INTARITOPOPS(type) \
+	ARITOPOPS(type) \
+	OPOP(type, %) \
+	OPOP(type, <<) \
+	OPOP(type, >>) \
+	OPOP(type, &) \
+	OPOP(type, |) \
+	OPOP(type, ^)
+
+#define CMPOPOPS(type) \
+	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ==(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r == l; } \
+	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator !=(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r != l; } \
+	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator < (const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r >= l; } \
+	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator > (const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r <= l; } \
+	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator <=(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r >  l; } \
+	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator >=(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r <  l; }
 
 #define WIDE_IF(condition) \
 	{ \
@@ -199,26 +218,34 @@ public:
 	wide_bool(const wide_bool&) = default;
 	wide_bool(bool r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) }
 	
-	explicit wide_bool(const bool *r) { FOR(v[i] = r[i] ? TRUE_BITS : FALSE_BITS) }
-	explicit wide_bool(const wide_int<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
-	explicit wide_bool(const wide_uint<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const bool *r)                    { FOR(v[i] = r[i]   ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const wide_int<Depth,Width> &r)   { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
+	explicit wide_bool(const wide_uint<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
 	explicit wide_bool(const wide_float<Depth,Width> &r) { FOR(v[i] = r.v[i] ? TRUE_BITS : FALSE_BITS) }
 	
 	wide_bool &operator=(const wide_bool&) = default;
-	wide_bool &operator=(bool r) { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
-	wide_bool &operator=(const cset<wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
+	wide_bool &operator=(bool r)                            { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
+	wide_bool &operator=(const cset<wide_bool> &test)       { *this = cmov(test.mask, test.a, *this); return *this; }
 	wide_bool &operator=(const cset<const wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
 
-	ASSVAL(wide_bool)
+	struct values { serial_t vals[Width]; };
+	wide_bool(const values &vals) : wide_bool(vals.vals) {}
+	wide_bool &operator=(const values &vals) { FOR(v[i] = vals.vals[i]) return *this; }
 
-	ASSOP(wide_bool, &=)
-	ASSOP(wide_bool, |=)
-	ASSOP(wide_bool, ^=)
+	wide_bool &operator &=(const wide_bool &r) { FOR(v[i] &= r.v[i]) return *this; }
+	wide_bool &operator &=(bool r)             { FOR(v[i] &= r)      return *this; }
+	wide_bool &operator |=(const wide_bool &r) { FOR(v[i] |= r.v[i]) return *this; }
+	wide_bool &operator |=(bool r)             { FOR(v[i] |= r)      return *this; }
+	wide_bool &operator ^=(const wide_bool &r) { FOR(v[i] ^= r.v[i]) return *this; }
+	wide_bool &operator ^=(bool r)             { FOR(v[i] ^= r)      return *this; }
+	
 	wide_bool operator!( void ) const { wide_bool o; FOR(o.v[i] = ~v[i]) return o; }
 
 	CMPOPS(wide_bool)
 	wide_bool operator&&(const wide_bool &r) const { return (*this) & r; }
+	wide_bool operator&&(bool r) const             { return (*this) & r; }
 	wide_bool operator||(const wide_bool &r) const { return (*this) | r; }
+	wide_bool operator||(bool r) const             { return (*this) | r; }
 
 	operator bool( void ) const { serial_t o = 0; FOR(o |= v[i]) return o ? true : false; }
 
@@ -229,9 +256,25 @@ public:
 template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> TRUE( void ) { return wide_bool<Depth,Width>(true); }
 template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> FALSE( void ) { return wide_bool<Depth,Width>(false); }
 
-OPOP(wide_bool, &)
-OPOP(wide_bool, |)
-OPOP(wide_bool, ^)
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator &(wide_bool<Depth,Width> l, const wide_bool<Depth,Width> &r) { return l &= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator &(wide_bool<Depth,Width> l, bool r)                          { return l &= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator &(bool l,                   const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) &= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator |(wide_bool<Depth,Width> l, const wide_bool<Depth,Width> &r) { return l |= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator |(wide_bool<Depth,Width> l, bool r)                          { return l |= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator |(bool l,                   const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) |= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ^(wide_bool<Depth,Width> l, const wide_bool<Depth,Width> &r) { return l ^= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ^(wide_bool<Depth,Width> l, bool r)                          { return l ^= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ^(bool l,                   const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) ^= r; }
+
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ==(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) == r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator !=(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) != r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator < (bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) >= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator > (bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) <= r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator <=(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) >  r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator >=(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) <  r; }
+
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator &&(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) && r; }
+template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ||(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) && r; }
 
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::int_t)) wide_int
@@ -251,17 +294,10 @@ public:
 	ASSVAL(wide_int)
 	INTARITASSOPS(wide_int)
 	UNIOP(wide_int, -)
-	BITOPS(wide_int)
 	CMPOPS(wide_int)
 };
-
-OPOP(wide_int, +)
-OPOP(wide_int, -)
-OPOP(wide_int, *)
-OPOP(wide_int, /)
-OPOP(wide_int, %)
-OPOP(wide_int, <<)
-OPOP(wide_int, >>)
+INTARITOPOPS(wide_int)
+CMPOPOPS(wide_int)
 
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_uint
@@ -280,20 +316,10 @@ public:
 	CONSTR(wide_uint, wide_float, wide_int)
 	ASSVAL(wide_uint)
 	INTARITASSOPS(wide_uint)
-	BITOPS(wide_uint)
 	CMPOPS(wide_uint)
 };
-
-OPOP(wide_uint, +)
-OPOP(wide_uint, -)
-OPOP(wide_uint, *)
-OPOP(wide_uint, /)
-OPOP(wide_uint, %)
-OPOP(wide_uint, <<)
-OPOP(wide_uint, >>)
-OPOP(wide_uint, &)
-OPOP(wide_uint, |)
-OPOP(wide_uint, ^)
+INTARITOPOPS(wide_uint)
+CMPOPOPS(wide_uint)
 
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::float_t)) wide_float
@@ -315,11 +341,8 @@ public:
 	UNIOP(wide_float, -)
 	CMPOPS(wide_float)
 };
-
-OPOP(wide_float, +)
-OPOP(wide_float, -)
-OPOP(wide_float, *)
-OPOP(wide_float, /)
+ARITOPOPS(wide_float)
+CMPOPOPS(wide_float)
 
 template < typename wide_t >
 wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, const wide_t &a, const wide_t &b) {
@@ -349,8 +372,11 @@ template < typename wide_t > const typename wide_t::serial_t *serialize(const wi
 #undef UNIOP
 #undef ARITASSOPS
 #undef INTARITASSOPS
-#undef BITOPS
 #undef CMPOP
 #undef CMPOPS
+#undef OPOP
+#undef ARITOPOPS
+#undef INTARITOPOPS
+#undef CMPOPOPS
 
 #endif // WIDE_H_INCLUDED__
