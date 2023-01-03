@@ -24,8 +24,8 @@
 	explicit type(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? serial_t(1) : serial_t(0)) } \
 	type &operator=(const type&) = default; \
 	type &operator=(serial_t r) { FOR(v[i] = r) return *this; } \
-	type &operator=(const cset<type> &test) { *this = cmov(test.mask, test.a, *this); return *this; } \
-	type &operator=(const cset<const type> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
+	type &operator=(const cset<type> &test) { *this = cmov(test.mask, test.value, *this); return *this; } \
+	type &operator=(const cset<const type> &test) { *this = cmov(test.mask, test.value, *this); return *this; }
 
 #define ASSOP(type, op) \
 	type &operator op(const type &r) { FOR(v[i] op r.v[i]) return *this; } \
@@ -192,7 +192,7 @@ template < typename wide_t >
 struct cset
 {
 	const wide_bool<wide_t::depth,wide_t::width> &mask;
-	const wide_t                                  a;
+	const wide_t                                  value;
 };
 
 template < uint32_t Depth, uint32_t Width >
@@ -225,8 +225,8 @@ public:
 	
 	wide_bool &operator=(const wide_bool&) = default;
 	wide_bool &operator=(bool r)                            { FOR(v[i] = r ? TRUE_BITS : FALSE_BITS) return *this; }
-	wide_bool &operator=(const cset<wide_bool> &test)       { *this = cmov(test.mask, test.a, *this); return *this; }
-	wide_bool &operator=(const cset<const wide_bool> &test) { *this = cmov(test.mask, test.a, *this); return *this; }
+	wide_bool &operator=(const cset<wide_bool> &test)       { *this = cmov(test.mask, test.value, *this); return *this; }
+	wide_bool &operator=(const cset<const wide_bool> &test) { *this = cmov(test.mask, test.value, *this); return *this; }
 
 	struct values { serial_t vals[Width]; };
 	wide_bool(const values &vals) : wide_bool(vals.vals) {}
@@ -348,6 +348,16 @@ template < typename wide_t >
 wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, const wide_t &a, const wide_t &b) {
 	const auto o = (*reinterpret_cast<const wide_bool<wide_t::depth, wide_t::width>*>(&a) & condition) | (*reinterpret_cast<const wide_bool<wide_t::depth, wide_t::width>*>(&b) & (!condition));
 	return *reinterpret_cast<const wide_t*>(&o);
+}
+
+template < typename wide_t >
+wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, typename wide_t::serial_t a, const wide_t &b) {
+	return cmov(condition, wide_t(a), b);
+}
+
+template < typename wide_t >
+wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, const wide_t &a, typename wide_t::serial_t b) {
+	return cmov(condition, a, wide_t(b));
 }
 
 template < typename wide_t > wide_t *wide_cast(typename wide_t::serial_t *stream, size_t byte_alignment = sizeof(wide_t)) {
