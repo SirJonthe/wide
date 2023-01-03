@@ -96,25 +96,43 @@
 	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator <=(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r >  l; } \
 	template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator >=(const typename type<Depth,Width>::serial_t &l, const type<Depth,Width> &r) { return r <  l; }
 
+// WIDE_IF
+// Helps setting up a conditional statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define WIDE_IF(condition) \
 	{ \
 		const auto &mask0 = mask; \
 		auto mask = (condition) & mask0; \
 		if (bool(mask)) {
+
+// WIDE_ELSE
+// Helps setting up a conditional statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define WIDE_ELSE \
 		} \
 		mask = !mask & mask0; \
 		if (bool(mask)) {
+
+// END_WIDE_IF
+// Helps concluding a conditional statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define END_WIDE_IF \
 		} \
 	}
 
+// WIDE_WHILE
+// Helps setting up a conditional loop statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define WIDE_WHILE(condition) \
 	{ \
 		const auto &mask0 = mask; \
 		do { \
 			auto mask = (condition) & mask0; \
 			if (bool(mask)) {
+
+// END_WIDE_WHILE
+// Helps concluding a conditional loop statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define END_WIDE_WHILE \
 			} else { \
 				break; \
@@ -122,13 +140,19 @@
 		} while (true); \
 	}
 
-
+// WIDE_DOWHILE
+// Helps setting up a conditional loop statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define WIDE_DOWHILE \
 	{ \
 		const auto &mask0 = mask; \
 		auto mask = mask0; \
 		do { \
 			if (bool(mask)) {
+
+// END_WIDE_DOWHILE
+// Helps concluding a conditional loop statement where the condition itself is a wide boolean type.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define END_WIDE_DOWHILE(condition) \
 			} else { \
 				break; \
@@ -137,6 +161,9 @@
 		} while (true); \
 	}
 
+// WIDE_SET
+// Helps modifying values defined outside the current conditional scope.
+// NOTE: Remember to set up a boolean variable named 'mask' at the root of the function, either as an input parameter or as a local define (all values usually set to all-true).
 #define WIDE_SET(l) wide::cset<decltype(l)>{ mask, l }
 
 namespace wide
@@ -188,6 +215,10 @@ template < uint32_t Depth, uint32_t Width > class wide_int;
 template < uint32_t Depth, uint32_t Width > class wide_uint;
 template < uint32_t Depth, uint32_t Width > class wide_float;
 
+// cset
+// A data structure allowing for conditional set based off of the input mask.
+// The value is set when the mask represents a TRUE state. This, or cmov, is necessary to use inside wide conditionals.
+// NOTE: Use WIDE_SET instead for ease of use.
 template < typename wide_t >
 struct cset
 {
@@ -195,6 +226,9 @@ struct cset
 	const wide_t                                  value;
 };
 
+// wide_bool
+// A data type representing a number of boolean values at a given bit depth.
+// The type is meant to be used as a single value, so the elements of the type can not be accessed directly.
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_bool
 {
@@ -276,6 +310,9 @@ template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator >=(b
 template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator &&(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) && r; }
 template < uint32_t Depth, uint32_t Width > wide_bool<Depth,Width> operator ||(bool l, const wide_bool<Depth,Width> &r) { return wide_bool<Depth,Width>(l) && r; }
 
+// wide_int
+// A data type representing a number of signed integer values at a given bit depth.
+// The type is meant to be used as a single value, so the elements of the type can not be accessed directly.
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::int_t)) wide_int
 {
@@ -299,6 +336,9 @@ public:
 INTARITOPOPS(wide_int)
 CMPOPOPS(wide_int)
 
+// wide_uint
+// A data type representing a number of unsigned integer values at a given bit depth.
+// The type is meant to be used as a single value, so the elements of the type can not be accessed directly.
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::uint_t)) wide_uint
 {
@@ -321,6 +361,9 @@ public:
 INTARITOPOPS(wide_uint)
 CMPOPOPS(wide_uint)
 
+// wide_float
+// A data type representing a number of floating point values at a given bit depth.
+// The type is meant to be used as a single value, so the elements of the type can not be accessed directly.
 template < uint32_t Depth, uint32_t Width >
 class alignas(Width * sizeof(typename __wide_types<Depth>::float_t)) wide_float
 {
@@ -344,29 +387,30 @@ public:
 ARITOPOPS(wide_float)
 CMPOPOPS(wide_float)
 
+// cmov
+// Stores 'a' when condition is true, and 'b' when condition is false.
+// This function is used to merge the results of branching paths together into a single wide value.
 template < typename wide_t >
 wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, const wide_t &a, const wide_t &b) {
 	const auto o = (*reinterpret_cast<const wide_bool<wide_t::depth, wide_t::width>*>(&a) & condition) | (*reinterpret_cast<const wide_bool<wide_t::depth, wide_t::width>*>(&b) & (!condition));
 	return *reinterpret_cast<const wide_t*>(&o);
 }
 
-template < typename wide_t >
-wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, typename wide_t::serial_t a, const wide_t &b) {
-	return cmov(condition, wide_t(a), b);
-}
+// cmov
+// Stores 'a' when condition is true, and 'b' when condition is false.
+// This function is used to merge the results of branching paths together into a single wide value.
+template < typename wide_t > wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, typename wide_t::serial_t a, const wide_t &b) { return cmov(condition, wide_t(a), b); }
+template < typename wide_t > wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, const wide_t &a, typename wide_t::serial_t b) { return cmov(condition, a, wide_t(b)); }
 
-template < typename wide_t >
-wide_t cmov(const wide_bool<wide_t::depth, wide_t::width> &condition, const wide_t &a, typename wide_t::serial_t b) {
-	return cmov(condition, a, wide_t(b));
-}
+// wide_cast
+// Directly converts a raw array of basic built-in types into a wide type with an optional memory alignment requirement which defaults to the byte size of the target wide type.
+// Note that it is recommended to ensure byte alignment requirements with the input array, as otherwise this may cause the resulting wide type pointer to point futher ahead than the input serial pointer.
+template < typename wide_t > wide_t *wide_cast(typename wide_t::serial_t *stream, size_t byte_alignment = sizeof(wide_t)) { return (stream & ~(byte_alignment - 1)) == stream ? reinterpret_cast<wide_t*>(stream) : nullptr; }
+template < typename wide_t > const wide_t *wide_cast(const typename wide_t::serial_t *stream, size_t byte_alignment = sizeof(wide_t)) { return (stream & ~(byte_alignment - 1)) == stream ? reinterpret_cast<wide_t*>(stream) : nullptr; }
 
-template < typename wide_t > wide_t *wide_cast(typename wide_t::serial_t *stream, size_t byte_alignment = sizeof(wide_t)) {
-	return (stream & ~(byte_alignment - 1)) == stream ? reinterpret_cast<wide_t*>(stream) : nullptr;
-}
-template < typename wide_t > const wide_t *wide_cast(const typename wide_t::serial_t *stream, size_t byte_alignment = sizeof(wide_t)) {
-	return (stream & ~(byte_alignment - 1)) == stream ? reinterpret_cast<wide_t*>(stream) : nullptr;
-}
-
+// serialize
+// Casts a wide type into its serial components in order to be able to directly access the internal types of the wide type.
+// This is not generally recommended unless you are flushing data out to a serial array.
 template < typename wide_t > typename wide_t::serial_t       *serialize(wide_t &w)       { return reinterpret_cast<typename wide_t::serial_t*>(&w); }
 template < typename wide_t > const typename wide_t::serial_t *serialize(const wide_t &w) { return reinterpret_cast<const typename wide_t::serial_t*>(&w); }
 
