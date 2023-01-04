@@ -19,9 +19,9 @@
 	type(const type&) = default; \
 	type(serial_t r) { FOR(v[i] = r) } \
 	explicit type(const serial_t *r) { FOR(v[i] = r[i]) } \
-	explicit type(const from1<Depth,Width> &r) { FOR(v[i] = r.v[i]) } \
-	explicit type(const from2<Depth,Width> &r) { FOR(v[i] = r.v[i]) } \
-	explicit type(const wide_bool<Depth,Width> &r)  { FOR(v[i] = r.v[i] ? serial_t(1) : serial_t(0)) } \
+	explicit type(const from1<Depth,Width> &r) { FOR(v[i] = serial_t(r.v[i])) } \
+	explicit type(const from2<Depth,Width> &r) { FOR(v[i] = serial_t(r.v[i])) } \
+	explicit type(const wide_bool<Depth,Width> &r) { FOR(v[i] = r.v[i] ? serial_t(1) : serial_t(0)) } \
 	type &operator=(const type&) = default; \
 	type &operator=(serial_t r) { FOR(v[i] = r) return *this; } \
 	type &operator=(const cset<type> &test) { *this = cmov(test.mask, test.value, *this); return *this; } \
@@ -413,6 +413,15 @@ template < typename wide_t > const wide_t *wide_cast(const typename wide_t::seri
 // This is not generally recommended unless you are flushing data out to a serial array.
 template < typename wide_t > typename wide_t::serial_t       *serialize(wide_t &w)       { return reinterpret_cast<typename wide_t::serial_t*>(&w); }
 template < typename wide_t > const typename wide_t::serial_t *serialize(const wide_t &w) { return reinterpret_cast<const typename wide_t::serial_t*>(&w); }
+
+// Useful typedefs. Provide WIDE_DEPTH and WIDE_WIDTH defines through the build stage.
+#if defined(WIDE_DEPTH) && defined(WIDE_WIDTH)
+	#define WIDE_DEFAULTS
+	typedef wide_bool<WIDE_DEPTH,WIDE_WIDTH>  bool_t;
+	typedef wide_int<WIDE_DEPTH,WIDE_WIDTH>   int_t;
+	typedef wide_uint<WIDE_DEPTH,WIDE_WIDTH>  uint_t;
+	typedef wide_float<WIDE_DEPTH,WIDE_WIDTH> float_t;
+#endif
 
 }
 

@@ -251,37 +251,6 @@ bool float_sqrt_bs( void )
 	return true;
 }
 
-float sin_test(float x)
-{
-	float sin = 0.0f;
-	if (x < -3.14159265f)
-		x += 6.28318531f;
-	else
-		if (x > 3.14159265f)
-			x -= 6.28318531f;
-
-	if ( x < 0 )
-	{
-		sin = x * ( 1.27323954f + 0.405284735f * x );
-		
-		if ( sin < 0 )
-			sin = sin * ( -0.255f * ( sin + 1 ) + 1 );
-		else
-			sin = sin * ( 0.255f * ( sin - 1 ) + 1 );
-	}
-	else
-	{
-		sin = x * ( 1.27323954f - 0.405284735f * x );
-		
-		if ( sin < 0 )
-			sin = sin * ( -0.255f * ( sin + 1 ) + 1 );
-		else
-			sin = sin * ( 0.255f * ( sin - 1 ) + 1 );
-	}
-	
-	return sin;
-}
-
 bool float_sin( void )
 {
 	std::cout << "float_sin...";
@@ -328,6 +297,19 @@ bool float_asin_bs( void )
 	if (!check_vals_epsilon(b, ::asin(fu_vals[0]), ::asin(fu_vals[1]), ::asin(fu_vals[2]), ::asin(fu_vals[3]), 0.01)) { return false; }
 
 	std::cout << "succeeded" << std::endl;
+	return true;
+}
+
+bool wide_defaults( void )
+{
+#ifdef WIDE_DEFAULTS
+	std::cout << "wide_defaults...";
+
+	wide::int_t a = 12;
+	if (!check_vals(a, 12, 12, 12, 12)) { return false; }
+
+	std::cout << "success" << std::endl;
+#endif
 	return true;
 }
 
@@ -379,6 +361,7 @@ int main(int,char**)
 	if (!float_sin())       { return 1; }
 	if (!float_cos())       { return 1; }
 	if (!float_tan())       { return 1; }
+	if (!wide_defaults())   { return 1; }
 //	if (!float_asin_bs())   { return 1; }
 //	if (!float_asin_nr())   { return 1; }
 	return 0;
