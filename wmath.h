@@ -1,3 +1,5 @@
+/// @file
+
 #ifndef WMATH_H_INCLUDED__
 #define WMATH_H_INCLUDED__
 
@@ -21,16 +23,14 @@ namespace wide
 {
 
 
-/**
- * Returns the highest value.
- * 
- * \param a a value.
- * \param b a value.
- * 
- * \returns the higher value.
- * 
- * \sa min
- */
+/// Returns the highest value.
+///
+/// @param a a value.
+/// @param b a value.
+///
+/// @returns the higher value.
+///
+/// @sa min
 template < typename wide_t >
 inline wide_t max(const wide_t &a, const wide_t &b)
 {
@@ -38,16 +38,14 @@ inline wide_t max(const wide_t &a, const wide_t &b)
 }
 
 
-/**
- * Returns the smallest value.
- * 
- * \param a a value.
- * \param b a value.
- * 
- * \returns the smaller value.
- * 
- * \sa max
- */
+/// Returns the smallest value.
+///
+/// @param a a value.
+/// @param b a value.
+///
+/// @returns the smaller value.
+///
+/// @sa max
 template < typename wide_t >
 inline wide_t min(const wide_t &a, const wide_t &b)
 {
@@ -55,13 +53,11 @@ inline wide_t min(const wide_t &a, const wide_t &b)
 }
 
 
-/**
- * Returns the positive value.
- * 
- * \param x a value.
- * 
- * \returns the positive value.
- */
+/// Returns the positive value.
+///
+/// @param x a value.
+///
+/// @returns the positive value.
 template < typename wide_t >
 inline wide_t abs(const wide_t &x)
 {
@@ -69,17 +65,15 @@ inline wide_t abs(const wide_t &x)
 }
 
 
-/**
- * Clamps a value inside a given inclusive range. Values below the lower bound returns the lower bound, while values above the higher bound returns the higher bound. All other values are returned as-is.
- * 
- * \param lo the lower bound.
- * \param x a value to be clamped.
- * \param hi the higher bound.
- * 
- * \returns the clamped value.
- * 
- * \sa wrap
- */
+/// Clamps a value inside a given inclusive range. Values below the lower bound returns the lower bound, while values above the higher bound returns the higher bound. All other values are returned as-is.
+///
+/// @param lo the lower bound.
+/// @param x a value to be clamped.
+/// @param hi the higher bound.
+///
+/// @returns the clamped value.
+///
+/// @sa wrap
 template < typename wide_t >
 inline wide_t clamp(const wide_t &lo, const wide_t &x, const wide_t &hi)
 {
@@ -87,13 +81,9 @@ inline wide_t clamp(const wide_t &lo, const wide_t &x, const wide_t &hi)
 }
 
 
-/**
- * Returns the fractions of a given floating-point value.
- * 
- * \param x a floating-point value.
- * 
- * \returns the fraction.
- */
+/// Returns the fractions of a given floating-point value.
+/// @param x a floating-point value.
+/// @returns the fraction.
 template < uint32_t Depth, uint32_t Width >
 inline wf frac(const wf &x)
 {
@@ -101,14 +91,12 @@ inline wf frac(const wf &x)
 }
 
 
-/**
- * Returns the integer and fractional part of a floating-point value.
- * 
- * \param x a floating-value.
- * \param intpart the output integer part of the input floating-point value 'x'.
- * 
- * \returns the fraction.
- */
+/// Returns the integer and fractional part of a floating-point value.
+///
+/// @param x a floating-value.
+/// @param intpart the output integer part of the input floating-point value 'x'.
+///
+/// @returns the fraction.
 template < uint32_t Depth, uint32_t Width >
 inline wf modf(const wf &x, const wf *intpart)
 {
@@ -117,18 +105,16 @@ inline wf modf(const wf &x, const wf *intpart)
 }
 
 
-/**
- * Returns the integer of an input floating-point value by rounding down positive numbers and rounding up negative numbers.
- * 
- * \param x a floating-point value.
- * 
- * \note This function properly handles negative numbers, unlike casting which truncates the fractional part.
- * 
- * \returns the floored value.
- * 
- * \sa ceil
- * \sa round
- */
+/// Returns the integer of an input floating-point value by rounding down positive numbers and rounding up negative numbers.
+///
+/// @param x a floating-point value.
+///
+/// @note This function properly handles negative numbers, unlike casting which truncates the fractional part.
+///
+/// @returns the floored value.
+///
+/// @sa ceil
+/// @sa round
 template < uint32_t Depth, uint32_t Width >
 inline wf floor(const wf &x)
 {
@@ -137,16 +123,14 @@ inline wf floor(const wf &x)
 }
 
 
-/**
- * Returns the integer of an input floating-point value by rounding up positive numbers and rounding down negative numbers.
- * 
- * \param x a floating-point value.
- * 
- * \returns the ceiled value.
- * 
- * \sa floor
- * \sa round
- */
+/// @Returns the integer of an input floating-point value by rounding up positive numbers and rounding down negative numbers.
+///
+/// @param x a floating-point value.
+///
+/// @returns the ceiled value.
+///
+/// @sa floor
+/// @sa round
 template < uint32_t Depth, uint32_t Width >
 inline wf ceil(const wf &x)
 {
@@ -155,16 +139,14 @@ inline wf ceil(const wf &x)
 }
 
 
-/**
- * Returns the integer of an input floating-point value by conventional rounding.
- * 
- * \param x floating-point value.
- * 
- * \returns the rounded value.
- * 
- * \sa floor
- * \sa ceil
- */
+/// Returns the integer of an input floating-point value by conventional rounding.
+///
+/// @param x floating-point value.
+///
+/// @returns the rounded value.
+///
+/// @sa floor
+/// @sa ceil
 template < uint32_t Depth, uint32_t Width >
 inline wf round(const wf &x)
 {
@@ -173,13 +155,11 @@ inline wf round(const wf &x)
 }
 
 
-/**
- * Returns the sign of the input value.
- * 
- * \param x a value.
- * 
- * \returns the sign of the value as an integer; -1 for negative, 0 for 0, and 1 for positive.
- */
+/// Returns the sign of the input value.
+///
+/// @param x a value.
+///
+/// @returns the sign of the value as an integer; -1 for negative, 0 for 0, and 1 for positive.
 template < typename wide_t >
 inline wide_t sign(const wide_t &x)
 {
@@ -187,13 +167,11 @@ inline wide_t sign(const wide_t &x)
 }
 
 
-/**
- * Returns the wrapped input floating-point value by repeating it within the real interval [0, 1).
- * 
- * \param x a floating-point value.
- * 
- * \returns the wrapped value.
- */
+/// Returns the wrapped input floating-point value by repeating it within the real interval [0, 1).
+///
+/// @param x a floating-point value.
+///
+/// @returns the wrapped value.
 template < uint32_t Depth, uint32_t Width >
 inline wf wrap(const wf &x)
 {
@@ -201,14 +179,12 @@ inline wf wrap(const wf &x)
 }
 
 
-/**
- * Returns the wrapped input floating-point value by repeating it within the real interval [0, max).
- * 
- * \param x a floating-point value.
- * \param max the upper bound of the range. Non-inclusive.
- * 
- * \returns the wrapped value.
- */
+/// Returns the wrapped input floating-point value by repeating it within the real interval [0, max).
+///
+/// @param x a floating-point value.
+/// @param max the upper bound of the range. Non-inclusive.
+///
+/// @returns the wrapped value.
 template < uint32_t Depth, uint32_t Width >
 inline wf wrap(const wf &x, const wf &max)
 {
@@ -216,17 +192,16 @@ inline wf wrap(const wf &x, const wf &max)
 	return max * wide::wrap(ratio);
 }
 
-/**
- * Returns the wrapped input floating-point value by repeating it within the real interval [min, max)
- * 
- * \param min the lower bound of the range. Inclusive.
- * \param x a floating-point value.
- * \param max the upper bound of the range. Non-inclusive.
- * 
- * \returns the wrapped value.
- * 
- * \sa clamp
- */
+
+/// Returns the wrapped input floating-point value by repeating it within the real interval [min, max)
+///
+/// @param min the lower bound of the range. Inclusive.
+/// @param x a floating-point value.
+/// @param max the upper bound of the range. Non-inclusive.
+///
+/// @returns the wrapped value.
+///
+/// @sa clamp
 template < uint32_t Depth, uint32_t Width >
 inline wf wrap(const wf &min, const wf & x, const wf &max)
 {
@@ -263,17 +238,15 @@ wf pi( void )
 #define WIDE_2_SQRTPI 1.1283792 // 2/sqrt(PI)
 
 
-/**
- * Returns an approximation of sine of the input floating-point radians.
- * 
- * \param rad input floating-point radians.
- * 
- * \returns the sine.
- * 
- * \sa cos
- * \sa tan
- * \sa asin
- */
+/// Returns an approximation of sine of the input floating-point radians.
+///
+/// @param rad input floating-point radians.
+///
+/// @returns the sine.
+///
+/// @sa cos
+/// @sa tan
+/// @sa asin
 template < uint32_t Depth, uint32_t Width >
 wf sin(wf rad)
 {
@@ -345,17 +318,15 @@ wf asin_bs(wf S)
 #undef F
 
 
-/**
- * Returns the cosine of the input floating-point radians.
- * 
- * \param rad input floating-point radians.
- * 
- * \returns the cosine.
- * 
- * \sa sin
- * \sa tan
- * \sa acos
- */
+/// Returns the cosine of the input floating-point radians.
+///
+/// @param rad input floating-point radians.
+///
+/// @returns the cosine.
+///
+/// @sa sin
+/// @sa tan
+/// @sa acos
 template < uint32_t Depth, uint32_t Width >
 wf cos(const wf &rad)
 {
@@ -363,17 +334,15 @@ wf cos(const wf &rad)
 }
 
 
-/**
- * Returns the tangent of the input floating-point radians.
- * 
- * \param rad input floating-point radians.
- * 
- * \returns the tangent.
- * 
- * \sa sin
- * \sa cos
- * \sa atan
- */
+/// Returns the tangent of the input floating-point radians.
+///
+/// @param rad input floating-point radians.
+///
+/// @returns the tangent.
+///
+/// @sa sin
+/// @sa cos
+/// @sa atan
 template < uint32_t Depth, uint32_t Width >
 wf tan(const wf &rad)
 {
@@ -448,15 +417,13 @@ wf sqrt_bs(const wf &x)
 }*/
 
 
-/**
- * Returns the square root of the input floating-point number via Newton-Raphson method.
- * 
- * \param x input floating-point value.
- * 
- * \returns the square root.
- * 
- * \sa sqrt_bs
- */
+/// Returns the square root of the input floating-point number via Newton-Raphson method.
+///
+/// @param x input floating-point value.
+///
+/// @returns the square root.
+///
+/// @sa sqrt_bs
 template < uint32_t Depth, uint32_t Width >
 wf sqrt_nr(const wf &x)
 {
@@ -477,15 +444,13 @@ wf sqrt_nr(const wf &x)
 }
 
 
-/**
- * Returns the square root of the input floating-point number via a binary partitioning method.
- * 
- * \param x input floating-point value.
- * 
- * \returns the square root.
- * 
- * \sa sqrt_nr
- */
+/// Returns the square root of the input floating-point number via a binary partitioning method.
+///
+/// @param x input floating-point value.
+///
+/// @returns the square root.
+///
+/// @sa sqrt_nr
 template < uint32_t Depth, uint32_t Width >
 wf sqrt_bs(const wf &x)
 {
@@ -532,30 +497,27 @@ wf sqrt_bs(const wf &x)
 }
 
 
-/**
- * Returns a boolean indicating if the input integer is even or not.
- * 
- * \param x input integer value.
- * 
- * \returns true for even, false if not.
- * 
- * \sa odd
- */
+/// Returns a boolean indicating if the input integer is even or not.
+///
+/// @param x input integer value.
+///
+/// @returns true for even, false if not.
+///
+/// @sa odd
 template < uint32_t Depth, uint32_t Width >
 wb even(const wi &x)
 {
 	return (x % wi(si(2))) == wi(si(0));
 }
 
-/**
- * Returns a boolean indicating if the input integer is odd or not.
- * 
- * \param x input integer value.
- * 
- * \returns true for odd, false if not.
- * 
- * \sa even
- */
+
+/// Returns a boolean indicating if the input integer is odd or not.
+///
+/// @param x input integer value.
+///
+/// @returns true for odd, false if not.
+///
+/// @sa even
 template < uint32_t Depth, uint32_t Width >
 wb odd(const wi &x)
 {
@@ -597,15 +559,13 @@ wf pow(wf x, wi n)
 }*/
 
 
-/**
- * Returns the base-2 logarithm of the input integer.
- * 
- * \param n input integer value.
- * 
- * \returns the base-2 logarithm of the integer.
- * 
- * \sa log10
- */
+/// Returns the base-2 logarithm of the input integer.
+///
+/// @param n input integer value.
+///
+/// @returns the base-2 logarithm of the integer.
+///
+/// @sa log10
 template < uint32_t Depth, uint32_t Width >
 wi log2(wi n)
 {
@@ -619,15 +579,13 @@ wi log2(wi n)
 }
 
 
-/**
- * Returns the base-10 logarithm of the input integer.
- * 
- * \param b input integer value.
- * 
- * \returns the base-10 logarithm of the integer.
- * 
- * \sa log2
- */
+/// Returns the base-10 logarithm of the input integer.
+///
+/// @param b input integer value.
+///
+/// @returns the base-10 logarithm of the integer.
+///
+/// @sa log2
 template < uint32_t Depth, uint32_t Width >
 wi log10(const wi &n)
 {
@@ -635,26 +593,22 @@ wi log10(const wi &n)
 }
 
 
-/**
- * Raises the input by an exponent.
- * 
- * \param base the base floating-point value to be raised by an exponent.
- * \param ex the floating-point exponent.
- * 
- * \returns the result of raising the base by the exponent.
- */
+/// Raises the input by an exponent.
+///
+/// @param base the base floating-point value to be raised by an exponent.
+/// @param ex the floating-point exponent.
+///
+/// @returns the result of raising the base by the exponent.
 template < uint32_t Depth, uint32_t Width >
 wf pow(const wf &base, const wf &ex);
 
 
-/**
- * Returns a number which, when raised by 'n' yields 'A'.
- * 
- * \param A input floating-point base.
- * \param n the input integer exponent.
- * 
- * \returns true for even, false if not.
- */
+/// Returns a number which, when raised by 'n' yields 'A'.
+///
+/// @param A input floating-point base.
+/// @param n the input integer exponent.
+///
+/// @returns true for even, false if not.
 template < uint32_t Depth, uint32_t Width >
 wf nth_root(const wf &A, const wi &n)
 {
@@ -668,14 +622,12 @@ wf nth_root(const wf &A, const wi &n)
 }
 
 
-/**
- * Raises the input by an exponent.
- * 
- * \param base the base floating-point value to be raised by an exponent.
- * \param ex the floating-point exponent.
- * 
- * \returns the result of raising the base by the exponent.
- */
+/// Raises the input by an exponent.
+///
+/// @param base the base floating-point value to be raised by an exponent.
+/// @param ex the floating-point exponent.
+///
+/// @returns the result of raising the base by the exponent.
 template < uint32_t Depth, uint32_t Width >
 wf pow(const wf &base, const wf &ex)
 {
