@@ -1,6 +1,6 @@
 # wide
 ## Copyright
-Copyright Jonathan Karlsson, 2023
+Copyright Jonathan Karlsson, 2022, 2023
 
 ## About
 `wide` is a small, standalone, header-only library used to help guide the compiler to emit data parallel processing instructions using SIMD in C++.

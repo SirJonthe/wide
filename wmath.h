@@ -1,4 +1,8 @@
 /// @file
+/// @author Jonathan Karlsson, github.com/SirJonthe
+/// @date 2022, 2023
+/// @copyright Jonathan Karlsson
+/// @license zlib
 
 #ifndef WMATH_H_INCLUDED__
 #define WMATH_H_INCLUDED__
