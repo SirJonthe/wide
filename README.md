@@ -194,3 +194,8 @@ The goal of the `wide` library is to have all wide types become stand-ins for th
 First, there is still work that need to be done with regards to the math library, `wmath.h`, so as to implement most, or all, of the math functions included in the standart C library.
 
 Second, there is a possibility to extend the C++ programming language by including a C parser that transforms serial C code into wide C-ish code. The output of this process could then be fed to the actual compiler. Due to how this affects the size and scope of the project, I may opt against this.
+
+
+## TODO
+* The math library is still incomplete.
+* More unit tests.
