@@ -1,6 +1,6 @@
 # wide
 ## Copyright
-Copyright Jonathan Karlsson, 2022, 2023
+Public domain, 2022, 2023
 
 ## About
 `wide` is a small, standalone, header-only library used to help guide the compiler to emit data parallel processing instructions using SIMD in C++.
@@ -143,7 +143,7 @@ WIDE_IF(A < B) // Holds true for first and second index.
 	C = WIDE_SET(A + B); // First and second index will be set to 5.0f and 5.0f respectively.
 WIDE_ELSE // Holds true for third and fourth index.
 	C = WIDE_SET(A - B); // Third and fourth index will be set to 1.0f and 3.0f respectively.
-END_WIDE_IF
+WIDE_END_IF
 ```
 
 `while` loop:
@@ -158,7 +158,7 @@ wide_int<32,4> i = 0;
 wide_int<32,4> count = wide_int<32,4>::values({1, 2, 3, 4});
 WIDE_WHILE(i < count)
 	i = WIDE_SET(i + 2)
-END_WIDE_WHILE
+WIDE_END_WHILE
 ```
 Note: The resulting `i` will be `[2, 2, 4, 4]`.
 
@@ -174,7 +174,7 @@ wide_int<32,4> i = 0;
 wide_int<32,4> count = wide_int<32,4>::values({0, 1, 2, 3});
 WIDE_DOWHILE
 	i = WIDE_SET(i + 1)
-END_WIDE_DOWHILE(i < count)
+WIDE_END_DOWHILE(i < count)
 ```
 Note: The resulting `i` will be `[1, 2, 3, 4]`.
 
