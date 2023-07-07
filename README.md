@@ -102,7 +102,7 @@ Read the documentation for your architecture and set up build scripts to properl
 ## Examples
 ### Assigning values to wide types:
 ```
-using namespace wide;
+using namespace cc0::wide;
 
 // ...
 
@@ -130,7 +130,7 @@ Note: Only the `wide_cast` function operates directly on the source data. All ot
 ### Conditionals
 Simple branch:
 ```
-using namespace wide;
+using namespace cc0::wide;
 
 // ...
 
@@ -148,7 +148,7 @@ WIDE_END_IF
 
 `while` loop:
 ```
-using namespace wide;
+using namespace cc0::wide;
 
 // ...
 
@@ -164,7 +164,7 @@ Note: The resulting `i` will be `[2, 2, 4, 4]`.
 
 `do-while` loop:
 ```
-using namespace wide;
+using namespace cc0::wide;
 
 // ...
 
