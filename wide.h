@@ -1,4 +1,5 @@
-/// @file
+/// @file wide.h
+/// @brief Contains a small, standalone, header-only library used to help guide the compiler to emit data parallel processing instructions using SIMD.
 /// @author github.com/SirJonthe
 /// @date 2022, 2023
 /// @copyright Public domain.

@@ -1,4 +1,5 @@
-/// @file
+/// @file wmath.h
+/// @brief Contains math functions for wide data types.
 /// @author github.com/SirJonthe
 /// @date 2022, 2023
 /// @copyright Public domain.
