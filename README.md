@@ -99,6 +99,8 @@ Read the documentation for your architecture and set up build scripts to properl
 
 * **Horizontal operations**: `wide` does not support horizontal operations without first converting a wide type into serial types. Horizontal operations are operations that operate on elements within the same wide type, e.g. `A[0] = A[1]+A[2]`, where `A` is a wide type. Note also that horizontal operations may degrade performance significantly as most architectures need to switch instruction set from wide mode to serial mode to make such operations. Some architectures, however, support horizontal operations in wide mode such as summing, getting the maximum or minimum value, or shuffling elements between indices. There is no explicit support for such architectures and operations.
 
+* **Changes to data topology**: Generally it is difficult to implement code where data topology changes as a result of conditions based off of wide types; As an example, it is difficult to implement arrays that grow or shrink in number of elements based off of wide comparisons since both code paths almost always run.
+
 ## Examples
 ### Assigning values to wide types:
 ```
@@ -187,12 +189,13 @@ struct Point4
 ```
 Note: The above code represents four points, where all X values are stored in `x`, all Y values stored in `y`, and all Z values stored in `z`.
 
-
 ## Future work
 The goal of the `wide` library is to have all wide types become stand-ins for their serial counterparts. Without extending the C++ language itself, the possibility of doing this fully is essentially nil.
 
 There is also still work that needs to be done with regards to the math library, `wmath.h`, so as to implement most, or all, of the math functions included in the standard C library.
 
+## Note
+C++26 implements SIMD support in the standard library which shares much of the design approach this library takes (see `std::simd`). Theoretically this support will make `wide` obsolete since it will be able to generate more efficient code at a higher degree of certainty. Complete and efficient implementation of SIMD support in the STL might take some time to achieve, however.
 
 ## TODO
 * The math library is still incomplete.
