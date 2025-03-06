@@ -80,11 +80,11 @@ Secondly, `g++` provides flags to hint the compiler at parallelizing tight loops
 
 Note, however, that providing the `-O3` option should already provide these flags to the compiler. As such, this step may not be needed.
 
-Third, it is a good idea to provide your comiler with information about the instruction support available for your target platform. Again, using `g++` as an example and a 
+Third, it is a good idea to provide your comiler with information about the instruction support available for your target platform. Again, using `g++` as an example and a x86/x64 SSE or AVX enabled CPU:
 
 `-msse` or `-mavx` depending on capabilities.
 
-Fourth, it is a good idea to hide type information in your code behind settings provided to your compiler. `wide` already gives the developer a conveinient optiopn (although the developer is free to implement their own solution):
+Fourth, it is a good idea to hide type information in your code behind settings provided to your compiler. `wide` already gives the developer a convenient option (although the developer is free to implement their own solution):
 
 `-DWIDE_DEPTH=32 -DWIDE_WIDTH=4` if using SSE, or `-DWIDE_DEPTH=32 -DWIDE_WIDTH=8`.
 
